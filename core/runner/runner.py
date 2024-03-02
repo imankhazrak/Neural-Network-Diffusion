@@ -21,14 +21,26 @@ from pytorch_lightning.strategies import DDPStrategy
 def set_seed(seed):
     pl.seed_everything(seed)
 
-def set_device(device_config):
-    # set the global cuda device
-    torch.backends.cudnn.enabled = True
-    os.environ["CUDA_VISIBLE_DEVICES"] = str(device_config.cuda_visible_devices)
-    torch.cuda.set_device(device_config.cuda)
-    torch.set_float32_matmul_precision('medium')
-    # warnings.filterwarnings("always")
+# def set_device(device_config):
+#     # set the global cuda device
+#     torch.backends.cudnn.enabled = True
+#     os.environ["CUDA_VISIBLE_DEVICES"] = str(device_config.cuda_visible_devices)
+#     torch.cuda.set_device(device_config.cuda)
+#     torch.set_float32_matmul_precision('medium')
+#     # warnings.filterwarnings("always")
 
+def set_device(device_config):
+    # Check if CUDA is available, and set device accordingly
+    if torch.cuda.is_available() and hasattr(device_config, 'cuda'):
+        torch.backends.cudnn.enabled = True
+        os.environ["CUDA_VISIBLE_DEVICES"] = str(device_config.cuda_visible_devices)
+        torch.cuda.set_device(device_config.cuda)
+        torch.set_float32_matmul_precision('medium')
+    else:
+        # If CUDA is not available, use CPU
+        print("CUDA is not available. Using CPU.")
+        device = torch.device("cpu")
+        torch.set_default_tensor_type('torch.FloatTensor')
 
 def set_processtitle(cfg):
     # set process title
